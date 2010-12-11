@@ -9,12 +9,12 @@ function Graph(canvas) {
     this.view = new View(this.graph, canvas);
 
     this.controller = new Controller(this.view,this.graph);
-    this.view.setController(this.controller);
-     
     //enable physics
     var physics = new Physics(this.graph);
     this.controller.physics = physics;
 
+    this.view.init(this.controller);
+    
     //closures for the handlers to access
     var view = this.view;
     var controller = this.controller;
@@ -216,19 +216,18 @@ function View(graph, canvas) {
 
 }
 
-//Draw the graph
-View.prototype.draw = function() {
-    var ctx = this.canvas.getContext("2d");
-    ctx.clearRect(0,0, this.canvas.width, this.canvas.height);
+//Inits the view, and associates it with a controller.
+//Because the vertex and edge drawing methods are customizeable,
+//They are stored in the (controller) option array.
+//The defaults are set here.
+View.prototype.init = function(cont) {
+    this.controller = cont;
 
-    //draw vertices
-    for (var i=0; i<this.graph.vertices.length; i++) {
-        var v = this.graph.vertices[i];
-
+    this.controller.options['vertexDrawFunction'] = function(ctx,v,graph) {
         ctx.beginPath();
-
+        
         //color
-        if (i == this.controller.currVertex) {
+        if (v == this.graph.vertices[this.controller.currVertex]) {
             ctx.strokeStyle = '#f00';
         }
 
@@ -238,17 +237,46 @@ View.prototype.draw = function() {
 
         //reset color
         ctx.strokeStyle = '#000000';
+    };
+
+    this.controller.options['edgeDrawFunction'] = function(ctx,e,graph) {
+        ctx.beginPath();
+        ctx.moveTo(e.v1.x, e.v1.y);
+        ctx.lineTo(e.v2.x, e.v2.y);
+        ctx.stroke();
+    };
+}
+
+//Draw the graph
+View.prototype.draw = function() {
+    var ctx = this.canvas.getContext("2d");
+    ctx.clearRect(0,0, this.canvas.width, this.canvas.height);
+
+    //draw vertices
+    for (var i=0; i<this.graph.vertices.length; i++) {
+        var v = this.graph.vertices[i];
+        this.drawVertex(ctx,v);
     }
 
     //draw edges
     for (var i=0; i<this.graph.edges.length; i++) {
         var e = this.graph.edges[i];
-        ctx.beginPath();
-        ctx.moveTo(e.v1.x, e.v1.y);
-        ctx.lineTo(e.v2.x, e.v2.y);
-        ctx.stroke();
+        this.drawEdge(ctx,e);
     }
+};
+
+View.prototype.drawVertex = function(ctx, vertex) {
+    var drawFunction = this.controller.options['vertexDrawFunction'];
+    drawFunction.apply(this,[ctx, vertex, this.graph]);
+};
+
+View.prototype.drawEdge = function(ctx, edge) {
+    var drawFunction = this.controller.options['edgeDrawFunction'];
+    drawFunction.apply(this,[ctx, edge, this.graph]);
 }
+
+    
+
 
 
 /**************************
