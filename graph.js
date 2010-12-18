@@ -63,7 +63,16 @@ Graph.prototype.clear = function() {
 
 Graph.prototype.setOption = function(name, value) {
     this.controller.options[name] = value;
-}
+};
+
+Graph.prototype.toJSON = function() {
+    return this.graph.toJSON();
+};
+
+Graph.prototype.fromJSON = function(json) {
+    this.graph.fromJSON(json);
+};
+    
 
 /*************************************
 /*   Controller

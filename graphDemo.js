@@ -6,13 +6,39 @@ var gParent;
 //should the canvas be resized to fit the window?
 var gFullscreen = true;
 
+//the actual canvas object
 var gCanvas;
+
+//server URI where graphs are saved.
+var gServer = "http://anorwell.com/content.py";
+
+var gCurrentUrl;
 
 function setup(canvas) {
     G = new Graph(canvas);
     gCanvas = canvas;
     init(G);
-}
+    
+    //if there is a gid param, load that graph.
+
+    var urlParts = parseURL();
+    gCurrentUrl = urlParts[0];
+    var params = urlParts[1];
+    if ("gid" in params) {
+        //if we're loading a graph, don't show instructions.
+        $("#usedialog").dialog("destroy");
+        $("#graph").unbind('click');
+        
+        $.get(gServer,
+              {type:"graph", id: params["gid"]},
+              function(data) {
+                  G.fromJSON(data[0]["graph"]);
+              });
+
+
+        
+    }
+};
 
 //resize function
 var onresizeOld = window.onresize;
@@ -109,6 +135,18 @@ function init(graph) {
                 }
             });
 
+        $("#sharedialog").dialog({
+            autoOpen: false,
+                    modal: true,
+                    width: 450,
+                    buttons: {
+                    'OK': function() {
+                        $(this).dialog('close');
+                    }
+                }
+            });
+
+
 };
 
 function saveButton() {
@@ -123,12 +161,22 @@ function optionsButton() {
     $("#optionsdialog").dialog('open');
 };
 
+function shareButton(graph) {
+    var json = graph.toJSON();
+    $.post(gServer, {graph: json}, function(gid) {
+            gid = gid.replace(/\r?\n$/, "");
+            var shareUrl = "http://anorwell.com/graph/?gid=" + gid;
+            $("#shareUrl").text(shareUrl);
+            $("#sharedialog").dialog('open');
+        });
+}
+
+
 function setOption(graph,name) {
     //currently only physics option
     graph.setOption('physics',name);
 };
 
-//ONRESIZE
 function onResize(parent) {
 
     if (gFullscreen) {
@@ -139,3 +187,23 @@ function onResize(parent) {
         gCanvas.width = parent.offsetWidth;
     }
 };
+
+
+
+
+//helper to get param pairs from query string
+function parseURL() {
+    var params = {};
+    var url = window.location.href;
+    var base = url.match(/^(.*)\?/)[1];
+
+    if (url.match(/\?/)) {
+        var pairs = url.replace(/#.*$/, '').replace(/^.*\?/, '').split(/[&;]/);
+        for (var p in pairs) {
+            var keyPair = pairs[p].split(/=/);
+            params[keyPair[0]] = keyPair[1];
+        }
+    }
+    return [base, params];
+}
+
