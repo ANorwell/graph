@@ -34,9 +34,10 @@ function setup(canvas) {
               function(data) {
                   G.fromJSON(data[0]["graph"]);
               });
+    }
 
-
-        
+    if (gFullscreen) {
+        onResize(gParent);
     }
 };
 
@@ -195,9 +196,9 @@ function onResize(parent) {
 function parseURL() {
     var params = {};
     var url = window.location.href;
-    var base = url.match(/^(.*)\?/)[1];
 
     if (url.match(/\?/)) {
+        var base = url.match(/^(.*)\?/)[1];
         var pairs = url.replace(/#.*$/, '').replace(/^.*\?/, '').split(/[&;]/);
         for (var p in pairs) {
             var keyPair = pairs[p].split(/=/);
