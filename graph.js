@@ -15,10 +15,11 @@ function Graph(canvas) {
 
     this.view.init(this.controller);
     
-    //closures for the handlers to access
+
     var view = this.view;
     var controller = this.controller;
 
+    //closures for the handlers to access
     canvas.onmousedown = function(event) {
         controller.mouseDownHandler(event)
     };
@@ -34,18 +35,21 @@ function Graph(canvas) {
     setInterval(step, 50);
 }
 
+//Saves the current graph in localstorage
 Graph.prototype.save = function(name) {
     if (name) {
         localStorage[name] = this.graph.toJSON();
     }
 };
 
+//Loads a localstorage-saved graph of the given name
 Graph.prototype.load = function(name) {
     if (localStorage.getItem(name)) {
         this.graph.fromJSON(localStorage.getItem(name));
     }
 };
 
+//Returns a list of graphs saved in HTML5 localstorage
 Graph.prototype.getSavedGraphsList = function() {
     var names = new Array();
     
@@ -56,19 +60,23 @@ Graph.prototype.getSavedGraphsList = function() {
     }
     return names;
 };
-        
+
+//Empties the graph of all edges and vertices
 Graph.prototype.clear = function() {
     this.graph.clear();
 };
 
+//sets the option "name" to the provided value.
 Graph.prototype.setOption = function(name, value) {
     this.controller.options[name] = value;
 };
 
+//The graph is serialized to a json form that is understood by fromJSON
 Graph.prototype.toJSON = function() {
     return this.graph.toJSON();
 };
 
+//Loads the vertices and edges from the provided
 Graph.prototype.fromJSON = function(json) {
     this.graph.fromJSON(json);
 };
@@ -96,7 +104,6 @@ function Controller(view, graph) {
     
 }
 
-//MOUSE DOWN
 Controller.prototype.mouseDownHandler = function(evt) {
 
     this.mouseDown = true;
@@ -108,7 +115,6 @@ Controller.prototype.mouseDownHandler = function(evt) {
     this.clickHandler(mouseX, mouseY);
 };
 
-//MOUSE UP
 Controller.prototype.mouseUpHandler = function (evt) {
     this.mouseDown = false;
     if (this.currVertexBeginMoving) {
@@ -118,7 +124,6 @@ Controller.prototype.mouseUpHandler = function (evt) {
     }
 };
     
-//MOUSE MOVE
 Controller.prototype.mouseMoveHandler = function(evt) {
     if (! this.mouseDown ) {
         return;
@@ -136,8 +141,6 @@ Controller.prototype.mouseMoveHandler = function(evt) {
     }
 };
 
-
-//The mouse click handler.
 Controller.prototype.clickHandler = function(mouseX, mouseY) {
     if ( mouseX > 0 && mouseY > 0 && mouseX < canvas.width && mouseY < canvas.height ) {
             
@@ -170,8 +173,6 @@ Controller.prototype.clickHandler = function(mouseX, mouseY) {
     }
 };
 
-
-//BUTTON CLICK
 Controller.prototype.buttonHandler = function(buttonType) {
     this.mode = buttonType;
     this.currVertex = null;
