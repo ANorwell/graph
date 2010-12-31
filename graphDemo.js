@@ -1,11 +1,4 @@
 
-//The parent of the canvas elt, used for finding
-//the canvas size
-var gParent;
-
-//should the canvas be resized to fit the window?
-var gFullscreen = true;
-
 //the actual canvas object
 var gCanvas;
 
@@ -16,6 +9,7 @@ var gCurrentUrl;
 
 function setup(canvas) {
     G = new Graph(canvas);
+    G.setOption('isEditable', true);
     gCanvas = canvas;
     init(G);
     
@@ -36,9 +30,7 @@ function setup(canvas) {
               });
     }
 
-    if (gFullscreen) {
-        onResize(gParent);
-    }
+    onResize();
 };
 
 //resize function
@@ -47,7 +39,7 @@ window.onresize = function() {
     if (onresizeOld) {
         onresizeOld();
     }
-    onResize(gParent);
+    onResize();
 };
 
 
@@ -178,15 +170,9 @@ function setOption(graph,name) {
     graph.setOption('physics',name);
 };
 
-function onResize(parent) {
-
-    if (gFullscreen) {
-        gCanvas.width = $(window).width();
-        gCanvas.height = $(window).height() - $("#footer").height();
-
-    } else {
-        gCanvas.width = parent.offsetWidth;
-    }
+function onResize() {
+    gCanvas.width = $(window).width();
+    gCanvas.height = $(window).height() - $("#footer").height();
 };
 
 
