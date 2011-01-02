@@ -4,3 +4,5 @@ This is a graph drawing tool written in js.  It uses HTML 5 canvas to
 draw graph elements on the page. jquery-ui is used for interface
 elements. Graphs can be locally saved and loaded using html5
 localstorage. 
+
+For more info, see http://anorwell.com/index.html?id=26
