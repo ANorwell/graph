@@ -96,7 +96,6 @@ function Controller(view, graph) {
     
 }
 
-//MOUSE DOWN
 Controller.prototype.mouseDownHandler = function(evt) {
     if (! this.options['isEditable']) {
         return;
@@ -104,14 +103,11 @@ Controller.prototype.mouseDownHandler = function(evt) {
         
     this.mouseDown = true;
     canvas = this.view.canvas;
-    var mouseX = evt.pageX - canvas.offsetLeft;
-    var mouseY = evt.pageY - canvas.offsetTop;
-
-    
-    this.clickHandler(mouseX, mouseY);
+    if (evt.currentTarget === this.view.canvas) {
+        this.clickHandler(evt.offsetX, evt.offsetY);
+    }
 };
 
-//MOUSE UP
 Controller.prototype.mouseUpHandler = function (evt) {
     if (! this.options['isEditable']) {
         return;
@@ -125,7 +121,6 @@ Controller.prototype.mouseUpHandler = function (evt) {
     }
 };
     
-//MOUSE MOVE
 Controller.prototype.mouseMoveHandler = function(evt) {
     if (! this.options['isEditable']) {
         return;
@@ -140,50 +135,43 @@ Controller.prototype.mouseMoveHandler = function(evt) {
 
         var v = this.graph.vertices[this.currVertex];
             
-        var mouseX = evt.pageX- canvas.offsetLeft;
-        var mouseY = evt.pageY - canvas.offsetTop;
+        var mouseX = evt.offsetX;
+        var mouseY = evt.offsetY;
         
-        this.moveVertex(v, mouseX, mouseY);
+        this.moveVertex(v, evt.offsetX, evt.offsetY);
     }
 };
 
-
-//The mouse click handler.
 Controller.prototype.clickHandler = function(mouseX, mouseY) {
 
-    if ( mouseX > 0 && mouseY > 0 && mouseX < canvas.width && mouseY < canvas.height ) {
-            
-        //check to see if a vertex is selected
-        var i = this.graph.getVertexNear(mouseX, mouseY, 2*this.view.vertexRadius);
-        if (i !== null ) {
+    //check to see if a vertex is selected
+    var i = this.graph.getVertexNear(mouseX, mouseY, 2*this.view.vertexRadius);
+    if (i !== null ) {
 
-            var v = this.graph.vertices[i];
+        var v = this.graph.vertices[i];
 
-            //check to see if an edge should be drawn
-            if (this.currVertex !== null &&
-                this.currVertex !== i  &&
-                !this.graph.hasEdge(this.graph.vertices[this.currVertex], this.graph.vertices[i]) ) {
-                this.graph.addEdge(this.graph.vertices[this.currVertex], v);
-            }
-
-            //update currVertex
-            if (this.currVertex == i) {
-                //We don't want to deselect the vertex
-                //Unless they've actually let go -- maybe its being moved.
-                this.currVertexBeginMoving = true;
-            } else {
-                this.currVertex = i;
-            }
-
-        } else { //a vertex is not selected -- add a new one.
-            this.graph.addVertex(mouseX, mouseY);
-            this.currVertex = this.graph.vertices.length -1;
+        //check to see if an edge should be drawn
+        if (this.currVertex !== null &&
+            this.currVertex !== i  &&
+            !this.graph.hasEdge(this.graph.vertices[this.currVertex], this.graph.vertices[i]) ) {
+            this.graph.addEdge(this.graph.vertices[this.currVertex], v);
         }
+
+        //update currVertex
+        if (this.currVertex == i) {
+            //We don't want to deselect the vertex
+            //Unless they've actually let go -- maybe its being moved.
+            this.currVertexBeginMoving = true;
+        } else {
+            this.currVertex = i;
+        }
+
+    } else { //a vertex is not selected -- add a new one.
+        this.graph.addVertex(mouseX, mouseY);
+        this.currVertex = this.graph.vertices.length -1;
     }
 };
 
-
-//BUTTON CLICK
 Controller.prototype.buttonHandler = function(buttonType) {
     this.mode = buttonType;
     this.currVertex = null;
