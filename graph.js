@@ -100,11 +100,17 @@ Controller.prototype.mouseDownHandler = function(evt) {
     if (! this.options['isEditable']) {
         return;
     }
-        
     this.mouseDown = true;
-    canvas = this.view.canvas;
-    if (evt.currentTarget === this.view.canvas) {
-        this.clickHandler(evt.offsetX, evt.offsetY);
+
+    var canvas = this.view.canvas;
+
+    //ideally, we use the evt.offsetX to get click location.
+    //firefox <4 doesn't have this, though.
+    var x = evt.offsetX or (evt.pageX - canvas.offsetX);
+    var y = evt.offsetY or (evt.pageY - canvas.offsetY);
+
+    if (evt.currentTarget === canvas) {
+        this.clickHandler(x,y);
     }
 };
 
