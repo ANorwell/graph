@@ -97,17 +97,17 @@ function Controller(view, graph) {
 }
 
 Controller.prototype.mouseDownHandler = function(evt) {
-    if (! this.options['isEditable']) {
+    if (! this.options['isEditable'] || !(evt.which == 1)) {
         return;
     }
+    
     this.mouseDown = true;
-
-    var canvas = this.view.canvas;
 
     //ideally, we use the evt.offsetX to get click location.
     //firefox <4 doesn't have this, though.
-    var x = evt.offsetX or (evt.pageX - canvas.offsetX);
-    var y = evt.offsetY or (evt.pageY - canvas.offsetY);
+    var canvas = this.view.canvas;
+    var x = evt.offsetX || (evt.layerX - canvas.offsetLeft);
+    var y = evt.offsetY || (evt.layerY - canvas.offsetTop);
 
     if (evt.currentTarget === canvas) {
         this.clickHandler(x,y);
@@ -140,11 +140,10 @@ Controller.prototype.mouseMoveHandler = function(evt) {
         this.currVertexBeginMoving = false;
 
         var v = this.graph.vertices[this.currVertex];
-            
-        var mouseX = evt.offsetX;
-        var mouseY = evt.offsetY;
-        
-        this.moveVertex(v, evt.offsetX, evt.offsetY);
+        var canvas = this.view.canvas;            
+        var x = evt.offsetX || (evt.layerX - canvas.offsetLeft);
+        var y = evt.offsetY || (evt.layerY - canvas.offsetTop);
+        this.moveVertex(v, x, y);
     }
 };
 
@@ -189,7 +188,7 @@ Controller.prototype.buttonHandler = function(buttonType) {
   for the GraphInt object provided to physics:
   var p = new Physics(graph);
   p.setPhysicsMode("float");
- */    
+*/    
 Controller.prototype.moveVertex = function(vertex, x, y) {
     this.physics.modes[this.options['physics']].apply(this.physics, [vertex,x,y]);
     
@@ -240,7 +239,7 @@ View.prototype.init = function(cont) {
 
     this.controller.options['vertexDrawFunction'] = function(ctx,v,graph) {
         ctx.beginPath();
-        
+
         //color
         if (v == this.graph.vertices[this.controller.currVertex]) {
             ctx.strokeStyle = '#f00';
@@ -263,22 +262,22 @@ View.prototype.init = function(cont) {
 }
 
 //Draw the graph
-View.prototype.draw = function() {
-    var ctx = this.canvas.getContext("2d");
-    ctx.clearRect(0,0, this.canvas.width, this.canvas.height);
+    View.prototype.draw = function() {
+        var ctx = this.canvas.getContext("2d");
+        ctx.clearRect(0,0, this.canvas.width, this.canvas.height);
 
-    //draw vertices
-    for (var i=0; i<this.graph.vertices.length; i++) {
-        var v = this.graph.vertices[i];
-        this.drawVertex(ctx,v);
-    }
+        //draw vertices
+        for (var i=0; i<this.graph.vertices.length; i++) {
+            var v = this.graph.vertices[i];
+            this.drawVertex(ctx,v);
+        }
 
-    //draw edges
-    for (var i=0; i<this.graph.edges.length; i++) {
-        var e = this.graph.edges[i];
-        this.drawEdge(ctx,e);
-    }
-};
+        //draw edges
+        for (var i=0; i<this.graph.edges.length; i++) {
+            var e = this.graph.edges[i];
+            this.drawEdge(ctx,e);
+        }
+    };
 
 View.prototype.drawVertex = function(ctx, vertex) {
     var drawFunction = this.controller.options['vertexDrawFunction'];
@@ -298,13 +297,13 @@ View.prototype.drawEdge = function(ctx, edge) {
 /*    GraphInt - the internal Graph class
 /***************************/
 
-function Vertex(x,y) {
-    this.x = x;
-    this.y = y;
-    this.marked = false;   //for iteration.
-    this.edges = new Array();
-    this.toString = function() { return "(" + this.x + "," + this.y + ")" };
-}
+    function Vertex(x,y) {
+        this.x = x;
+        this.y = y;
+        this.marked = false;   //for iteration.
+        this.edges = new Array();
+        this.toString = function() { return "(" + this.x + "," + this.y + ")" };
+    }
 
 //Only works properly in firefox, so should be called as follows:
 //OR: var itr = vertex.__iterator__()
@@ -337,10 +336,10 @@ VertexIterator.prototype.next = function() {
     return null;
 }
 
-function Edge(v1, v2) {
-    this.v1 = v1;
-    this.v2 = v2;
-}
+    function Edge(v1, v2) {
+        this.v1 = v1;
+        this.v2 = v2;
+    }
 
 function GraphInt() {
     this.vertices = new Array();
