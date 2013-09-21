@@ -5,4 +5,5 @@ draw graph elements on the page. jquery-ui is used for interface
 elements. Graphs can be locally saved and loaded using html5
 localstorage. 
 
-For more info, see http://anorwell.com/index.html?id=26
+For more info, see http://anorwell.com/index.php?id=26
+See  http://anorwell.com/graph for an example
